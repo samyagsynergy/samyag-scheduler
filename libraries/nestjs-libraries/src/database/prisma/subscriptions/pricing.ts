@@ -21,12 +21,12 @@ export interface PricingInterface {
 }
 export const pricing: PricingInterface = {
   FREE: {
-    current: 'FREE',
+    current: Number(process.env.FREE_TIER_CHANNELS) || 10,
     month_price: 0,
     year_price: 0,
     channel: 0,
     image_generation_count: 0,
-    posts_per_month: 0,
+    posts_per_month: Number(process.env.FREE_TIER_POSTS_PER_MONTH) || 31,
     team_members: false,
     community_features: false,
     featured_by_gitroom: false,
