@@ -1,0 +1,23 @@
+diff --git a/libraries/nestjs-libraries/src/database/prisma/subscriptions/pricing.ts b/libraries/nestjs-libraries/src/database/prisma/subscriptions/pricing.ts
+index cc4db92..5244e4f 100644
+--- a/libraries/nestjs-libraries/src/database/prisma/subscriptions/pricing.ts
++++ b/libraries/nestjs-libraries/src/database/prisma/subscriptions/pricing.ts
+@@ -21,12 +21,16 @@ export interface PricingInterface {
+ }
+ export const pricing: PricingInterface = {
+   FREE: {
++    // Samyag Synergy: everyone gets this tier — the whole product is free.
++    // Both numbers below are fair-use ceilings, not a paywall, and are read
++    // from environment variables so they can be changed without a rebuild —
++    // see FREE_TIER_NOTES.md and docker-compose.yaml.
+     current: 'FREE',
+     month_price: 0,
+     year_price: 0,
+-    channel: 0,
++    channel: Number(process.env.FREE_TIER_CHANNELS) || 10,
+     image_generation_count: 0,
+-    posts_per_month: 0,
++    posts_per_month: Number(process.env.FREE_TIER_POSTS_PER_MONTH) || 31,
+     team_members: false,
+     community_features: false,
+     featured_by_gitroom: false,

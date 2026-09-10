@@ -1,129 +1,78 @@
 services:
   postiz:
-    image: ghcr.io/gitroomhq/postiz-app:latest
+    # Built from YOUR fork, not the stock Postiz image — see DEPLOY.md step 2.
+    # Example: ghcr.io/YOUR-GITHUB-USERNAME/samyag-scheduler:latest
+    image: 'REPLACE_ME/samyag-scheduler:latest'
     container_name: postiz
     restart: always
     environment:
-      # === Required Settings
-      MAIN_URL: 'http://localhost:4007'
-      FRONTEND_URL: 'http://localhost:4007'
-      NEXT_PUBLIC_BACKEND_URL: 'http://localhost:4007/api'
-      JWT_SECRET: 'random string that is unique to every install - just type random characters here!'
-      DATABASE_URL: 'postgresql://postiz-user:postiz-password@postiz-postgres:5432/postiz-db-local'
-      REDIS_URL: 'redis://postiz-redis:6379'
+      # === Required — replace these with your real domain ===
+      # (e.g. schedule.samyagsynergy.com — this will be a Cloudflare-fronted
+      # address, see DEPLOY.md step 5; there is no need to point this at a
+      # raw server IP)
+      MAIN_URL: 'https://REPLACE_WITH_YOUR_DOMAIN'
+      FRONTEND_URL: 'https://REPLACE_WITH_YOUR_DOMAIN'
+      NEXT_PUBLIC_BACKEND_URL: 'https://REPLACE_WITH_YOUR_DOMAIN/api'
       BACKEND_INTERNAL_URL: 'http://localhost:3000'
+
+      # Real random secret, already generated for you — do not reuse this
+      # exact value if you ever fork this again; generate a fresh one with:
+      # openssl rand -hex 32
+      JWT_SECRET: '71631aa51bcd839f4284538f3a0cd20e641bb3060a15797d9585f015dc69dbf6'
+
+      DATABASE_URL: 'postgresql://postiz-user:8da837382703eb1c60ddb9f2f82120151062fd91@postiz-postgres:5432/postiz-db-local'
+      REDIS_URL: 'redis://postiz-redis:6379'
       TEMPORAL_ADDRESS: 'temporal:7233'
       IS_GENERAL: 'true'
-      DISABLE_REGISTRATION: 'false'
 
-      # === Storage Settings
+      # PERSONAL-USE PHASE: only the very first account to sign up is
+      # allowed to register — everyone after that is blocked. This lets
+      # you test with your own accounts right now, safely, before you're
+      # ready for strangers. Verified directly in Postiz's own auth code
+      # (see SECURITY.md). Flip to 'false' only when you're ready to open
+      # this to the public.
+      DISABLE_REGISTRATION: 'true'
+
+      # === Free-tier limits — change these anytime, then just restart the
+      # container (docker compose up -d) — no rebuild needed. ===
+      FREE_TIER_POSTS_PER_MONTH: 31
+      FREE_TIER_CHANNELS: 10
+
+      # === Storage ===
       STORAGE_PROVIDER: 'local'
       UPLOAD_DIRECTORY: '/uploads'
       NEXT_PUBLIC_UPLOAD_DIRECTORY: '/uploads'
 
-      # === Cloudflare (R2) Settings
-      # STORAGE_PROVIDER: 'cloudflare'
-      # CLOUDFLARE_ACCOUNT_ID: 'your-account-id'
-      # CLOUDFLARE_ACCESS_KEY: 'your-access-key'
-      # CLOUDFLARE_SECRET_ACCESS_KEY: 'your-secret-access-key'
-      # CLOUDFLARE_BUCKETNAME: 'your-bucket-name'
-      # CLOUDFLARE_BUCKET_URL: 'https://your-bucket-url.r2.cloudflarestorage.com/'
-      # CLOUDFLARE_REGION: 'auto'
+      # === The 4 platforms — fill each in after registering a developer app (DEPLOY.md step 4) ===
+      # X (Twitter) intentionally left out — see CHANGES.md for why.
+      LINKEDIN_CLIENT_ID: 'REPLACE_ME'
+      LINKEDIN_CLIENT_SECRET: 'REPLACE_ME'
+      # Instagram rides on the same Facebook app credentials — one app, both platforms
+      FACEBOOK_APP_ID: 'REPLACE_ME'
+      FACEBOOK_APP_SECRET: 'REPLACE_ME'
+      YOUTUBE_CLIENT_ID: 'REPLACE_ME'
+      YOUTUBE_CLIENT_SECRET: 'REPLACE_ME'
 
-      # === Social Media API Settings
-      X_URL: ''
-      X_API_KEY: ''
-      X_API_SECRET: ''
-      LINKEDIN_CLIENT_ID: ''
-      LINKEDIN_CLIENT_SECRET: ''
-      REDDIT_CLIENT_ID: ''
-      REDDIT_CLIENT_SECRET: ''
-      GITHUB_CLIENT_ID: ''
-      GITHUB_CLIENT_SECRET: ''
-      APPLE_CLIENT_ID: ''
-      APPLE_TEAM_ID: ''
-      APPLE_KEY_ID: ''
-      APPLE_PRIVATE_KEY: ''
-      BEEHIIVE_API_KEY: ''
-      BEEHIIVE_PUBLICATION_ID: ''
-      THREADS_APP_ID: ''
-      THREADS_APP_SECRET: ''
-      FACEBOOK_APP_ID: ''
-      FACEBOOK_APP_SECRET: ''
-      YOUTUBE_CLIENT_ID: ''
-      YOUTUBE_CLIENT_SECRET: ''
-      TIKTOK_CLIENT_ID: ''
-      TIKTOK_CLIENT_SECRET: ''
-      TIKTOK_BUSINESS_CLIENT_ID: ''
-      TIKTOK_BUSINESS_CLIENT_SECRET: ''
-      PINTEREST_CLIENT_ID: ''
-      PINTEREST_CLIENT_SECRET: ''
-      DRIBBBLE_CLIENT_ID: ''
-      DRIBBBLE_CLIENT_SECRET: ''
-      TUMBLR_CLIENT_ID: ''
-      TUMBLR_CLIENT_SECRET: ''
-      DISCORD_CLIENT_ID: ''
-      DISCORD_CLIENT_SECRET: ''
-      DISCORD_BOT_TOKEN_ID: ''
-      SLACK_ID: ''
-      SLACK_SECRET: ''
-      SLACK_SIGNING_SECRET: ''
-      MASTODON_URL: 'https://mastodon.social'
-      MASTODON_CLIENT_ID: ''
-      MASTODON_CLIENT_SECRET: ''
-
-      # === OAuth & Authentik Settings
-      # NEXT_PUBLIC_POSTIZ_OAUTH_DISPLAY_NAME: 'Authentik'
-      # NEXT_PUBLIC_POSTIZ_OAUTH_LOGO_URL: 'https://raw.githubusercontent.com/walkxcode/dashboard-icons/master/png/authentik.png'
-      # POSTIZ_GENERIC_OAUTH: 'false'
-      # POSTIZ_OAUTH_URL: 'https://auth.example.com'
-      # POSTIZ_OAUTH_AUTH_URL: 'https://auth.example.com/application/o/authorize'
-      # POSTIZ_OAUTH_TOKEN_URL: 'https://auth.example.com/application/o/token'
-      # POSTIZ_OAUTH_USERINFO_URL: 'https://authentik.example.com/application/o/userinfo'
-      # POSTIZ_OAUTH_CLIENT_ID: ''
-      # POSTIZ_OAUTH_CLIENT_SECRET: ''
-      # POSTIZ_OAUTH_SCOPE: "openid profile email"  # Optional: uncomment to override default scope
-
-      # === Sentry
-
-      # NEXT_PUBLIC_SENTRY_DSN: 'http://spotlight:8969/stream'
-      # SENTRY_SPOTLIGHT: '1'
-
-      # === Misc Settings
-      OPENAI_API_KEY: ''
-      # Only this OAuth client can receive verified user email claims via OIDC.
-      OPENAI_OAUTH_CLIENT_ID: ''
-      NEXT_PUBLIC_DISCORD_SUPPORT: ''
-      NEXT_PUBLIC_POLOTNO: ''
-      API_LIMIT: 30
-
-      # === Payment / Stripe Settings
-      FEE_AMOUNT: 0.05
-      STRIPE_PUBLISHABLE_KEY: ''
-      STRIPE_SECRET_KEY: ''
+      # === Turns on Postiz's own free-tier limit system (31 posts/month) ===
+      # This is NOT a real Stripe account — Postiz's own code already falls
+      # back to a harmless placeholder ('sk_nothing') if left blank, but we
+      # set explicit placeholders here so it's clear nothing is being billed.
+      # See SECURITY.md for the exact line of Postiz source this refers to.
+      STRIPE_PUBLISHABLE_KEY: 'pk_placeholder_no_real_account'
+      STRIPE_SECRET_KEY: 'sk_placeholder_no_real_account'
       STRIPE_SIGNING_KEY: ''
-      STRIPE_SIGNING_KEY_CONNECT: ''
+      FEE_AMOUNT: 0
 
-      # === Developer Settings
       NX_ADD_PLUGINS: false
-
-      # === Short Link Service Settings (Optional - leave blank if unused)
-      # DUB_TOKEN: ""
-      # DUB_API_ENDPOINT: "https://api.dub.co"
-      # DUB_SHORT_LINK_DOMAIN: "dub.sh"
-      # SHORT_IO_SECRET_KEY: ""
-      # KUTT_API_KEY: ""
-      # KUTT_API_ENDPOINT: "https://kutt.it/api/v2"
-      # KUTT_SHORT_LINK_DOMAIN: "kutt.it"
-      # LINK_DRIP_API_KEY: ""
-      # LINK_DRIP_API_ENDPOINT: "https://api.linkdrip.com/v1/"
-      # LINK_DRIP_SHORT_LINK_DOMAIN: "dripl.ink"
-
+    # Exposed on the standard web port. Cloudflare's proxy (the orange-cloud
+    # DNS record you already use for your main site) sits in front of this
+    # and provides free HTTPS automatically — no extra tunnel software
+    # needed. See DEPLOY.md step 3.
+    ports:
+      - '80:5000'
     volumes:
       - postiz-config:/config/
       - postiz-uploads:/uploads/
-    ports:
-      - '4007:5000'
     networks:
       - postiz-network
       - temporal-network
@@ -138,7 +87,7 @@ services:
     container_name: postiz-postgres
     restart: always
     environment:
-      POSTGRES_PASSWORD: postiz-password
+      POSTGRES_PASSWORD: '8da837382703eb1c60ddb9f2f82120151062fd91'
       POSTGRES_USER: postiz-user
       POSTGRES_DB: postiz-db-local
     volumes:
@@ -150,6 +99,7 @@ services:
       interval: 10s
       timeout: 3s
       retries: 3
+
   postiz-redis:
     image: redis:7.2
     container_name: postiz-redis
@@ -164,19 +114,9 @@ services:
     networks:
       - postiz-network
 
-  # For Application Monitoring / Debugging
-  spotlight:
-    pull_policy: always
-    container_name: spotlight
-    ports:
-      - 8969:8969/tcp
-    image: ghcr.io/getsentry/spotlight:latest
-    networks:
-      - postiz-network
-
-  # -----------------------
-  # Temporal Stack
-  # -----------------------
+  # --- Temporal: the scheduling engine Postiz runs on. Required, do not remove. ---
+  # None of these need a published host port — Postiz talks to "temporal:7233"
+  # over the internal Docker network by name, not through the host machine.
   temporal-elasticsearch:
     container_name: temporal-elasticsearch
     image: elasticsearch:7.17.27
@@ -199,7 +139,7 @@ services:
     container_name: temporal-postgresql
     image: postgres:16
     environment:
-      POSTGRES_PASSWORD: temporal
+      POSTGRES_PASSWORD: '8b85672acadbb42cb167708c6d9d5343a8b7c27e'
       POSTGRES_USER: temporal
     networks:
       - temporal-network
@@ -210,8 +150,6 @@ services:
 
   temporal:
     container_name: temporal
-    ports:
-      - '7233:7233'
     image: temporalio/auto-setup:1.28.1
     depends_on:
       - temporal-postgresql
@@ -220,7 +158,7 @@ services:
       - DB=postgres12
       - DB_PORT=5432
       - POSTGRES_USER=temporal
-      - POSTGRES_PWD=temporal
+      - POSTGRES_PWD=8b85672acadbb42cb167708c6d9d5343a8b7c27e
       - POSTGRES_SEEDS=temporal-postgresql
       - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
       - ENABLE_ES=true
@@ -247,27 +185,13 @@ services:
       - temporal
     tty: true
 
-  temporal-ui:
-    container_name: temporal-ui
-    image: temporalio/ui:2.34.0
-    environment:
-      - TEMPORAL_ADDRESS=temporal:7233
-      - TEMPORAL_CORS_ORIGINS=http://127.0.0.1:3000
-    networks:
-      - temporal-network
-    ports:
-      - '8080:8080'
-
 volumes:
   postgres-volume:
     external: false
-
   postiz-redis-data:
     external: false
-
   postiz-config:
     external: false
-
   postiz-uploads:
     external: false
 
